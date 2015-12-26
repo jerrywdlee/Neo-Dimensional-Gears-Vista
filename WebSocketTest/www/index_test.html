@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html>
+<head>
+<script src="http://ajax.googleapis.com/ajax/libs/jquery/1/jquery.min.js"></script>
+<script>
+var output = "";
+$(document).ready(function(){
+  $("#order").click(function(){
+  	$("input").each(function(){
+  		//alert($(this).val()-1)
+  		for (var i = 0; i < $(this).val(); i++) {
+  			output+=$(this).attr("id");
+  			output+=" ";
+  		};
+  	});
+    $("#output").html(output);
+  });
+  $("#clear").click(function(){
+    output = "";
+    $("#output").html(output);
+  });
+});
+</script>
+</head>
+
+<body>
+<h2>U-Testデータ正規化</h2>
+<p><a href="http://www.m-sugaya.jp/python/utest.html">こちら</a>のサイトで使うための正規化</p>
+<p>0:<input type="number" id="0" ></p>
+<p>1:<input type="number" id="1" ></p>
+<p>2:<input type="number" id="2" ></p>
+<p>3:<input type="number" id="3" ></p>
+<p>4:<input type="number" id="4" ></p>
+<p>ここで表示されます：</p>
+<p id="output"></p>
+<button id="order">正規化</button>
+<button id="clear">クリア</button>
+</body>
+</html>

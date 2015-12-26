@@ -1,0 +1,31 @@
+<title>Pythagorean theorem</title>
+<h1>Pythagorean theorem</h1>
+<div>
+	<p>a=<input type="number" id="num1" value='3'></p>
+	<p>b=<input type="number" id="num2" value='4'></p>
+	<button id='sendBtn'>Send</button>
+	<br>
+	<p>c=<a id='ans'>???</a></p>
+</div>
+
+
+<script src="/socket.io/socket.io.js"></script>
+<script type="text/javascript">
+	var socket=io.connect(),//与服务器进行连接
+	//var num=eval(document.getElementById('num').value);
+	button=document.getElementById('sendBtn');
+
+	
+	button.onclick=function(){
+		var num1=eval(document.getElementById('num1').value);
+		var num2=eval(document.getElementById('num2').value);
+		//alert(eval(document.getElementById('num').value));
+		//alert(num);
+		socket.emit('foo',num1,num2);//发送一个名为foo的事件，并且传递变量num
+	}
+	//当后端传来answer事件时，改写网页
+	socket.on('answer',function(answer){
+		document.getElementById('ans').innerHTML=answer;
+	});
+</script>
+<br/>
