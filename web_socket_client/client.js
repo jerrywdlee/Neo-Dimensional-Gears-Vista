@@ -1,9 +1,19 @@
 var socket_io = require('socket.io-client'),//socket.io-client模块(不要浏览器的)
 	sqlite3 = require('sqlite3');//数据库模块
-var socket = socket_io.connect('http://localhost/');
-//因为服务器端用的是port80;这个函数似不可带回调
 
-var db = new sqlite3.Database('db.sqlite3');
+var db = new sqlite3.Database('db.sqlite3');//连接数据库
+
+//var socket = socket_io.connect('http://localhost/');
+var socket = socket_io.connect('https://localhost/');
+//因为服务器端用的是port80(http)或443(https);这个函数似不可带回调
+
+socket.on('error', function(reason) { //抓取错误信息
+    console.log(reason);
+});
+
+socket.on('connect', function() {
+	console.log('Client Connected to Server');
+});
 
 function send (data1,data2) {
 	//向服务器端发送数据
