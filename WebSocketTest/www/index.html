@@ -8,6 +8,18 @@
 	<p>c=<a id='ans'>???</a></p>
 </div>
 
+<div>
+	<h2><a>Table Name</a></h2>
+	
+	<button id='requireName'>Require Name</button>
+	<p><select id="table_name">
+		<!-- As a Placeholder -->
+		<option disabled selected>-No Data-</option>
+	</select>
+	<button id="requireDB" disabled="true">Require DB</button></p>
+	<div id="db_data"><p>No Data</p></div>
+</div>
+
 
 <script src="/socket.io/socket.io.js"></script>
 <script type="text/javascript">
@@ -15,7 +27,7 @@
 	//var num=eval(document.getElementById('num').value);
 	button=document.getElementById('sendBtn');
 
-	
+	//按下按钮，提交数据
 	button.onclick=function(){
 		var num1=eval(document.getElementById('num1').value);
 		var num2=eval(document.getElementById('num2').value);
@@ -27,5 +39,77 @@
 	socket.on('answer',function(answer){
 		document.getElementById('ans').innerHTML=answer;
 	});
+
+	var requireName=document.getElementById('requireName');
+	//当require name按下时
+	requireName.onclick=function(){
+		//先删除下拉菜单中所有节点
+		delAllOptions("table_name","option");
+		delAllOptions("table_name","optgroup");
+		//再向服务器发送“请求table名”
+		socket.emit('require_table_name');
+	}
+	//将接收到的table名写进page
+	socket.on('table_name_receive',function(res){
+		//先删除下拉菜单中所有节点
+		//delAllOptions("table_name");//写在这边会丢东西，因为这边会执行多次
+		//然后将接收到的东西写入select
+		//先写一个能区别是啥的
+		//addTableName("table_name","option","group1");
+		addTableName("table_name","optgroup","group name","group name");
+		for (var i in res) {
+			addTableName("table_name","option",res[i].name);
+		}
+		//最后使获取db数据的按钮可用
+		document.getElementById("requireDB").disabled="";
+	});
+
+	//发送请求数据库
+	requireDB.onclick=function(){
+		var table_name = document.getElementById("table_name").value;
+		//alert(value);
+		socket.emit('require_db_data',table_name);
+	}
+	socket.on('db_data_receive',function(res){
+		var tempContent = "";
+		for (var i in res) {
+			tempContent += "<p>"+res[i].id+":"+res[i].data+",";
+			//tempContent += res[i].id;
+			//tempContent += ":";
+			//tempContent += res[i].data;
+			//tempContent += ",";
+			tempContent += res[i].time + "</p>";
+	    };	
+	    document.getElementById("db_data").innerHTML=tempContent;
+	})
+
+
+
+
+	function addTableName(parent_id,tag,table_name,label,disabled){
+		var para=document.createElement(tag);
+		var node=document.createTextNode(table_name);
+		para.id=table_name;//添加id及值
+		para.value=table_name;
+		para.label=label;//optgroup用
+		para.disabled=disabled;//如果值为空则可用
+		//para.innerHTML=table_name;
+		para.appendChild(node);//新建一个table名option
+		var element=document.getElementById(parent_id);
+		element.appendChild(para);//在select里添加option
+	}
+
+	function delAllOptions(id,tag){
+		var parent=document.getElementById(id);
+		var child=document.getElementsByTagName(tag);
+		for (var i in child) {
+			try{ //不知道为啥会报错。。。
+				parent.removeChild(child[0]);//每删一个数组的值都会变
+			}catch(err){
+				console.log(err);
+			}	
+		};
+	}
+
 </script>
 <br/>
