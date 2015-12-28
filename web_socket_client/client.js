@@ -14,6 +14,10 @@ socket.on('error', function(reason) { //抓取错误信息
 socket.on('connect', function() {
 	console.log('Client Connected to Server');
 });
+//显示断线
+socket.on('disconnect',function() {    	
+    	console.log('Disconnected from Server')
+})
 
 //获得所有既存的table名(sqlite_sequence是一个自动生成的table，不要动他)
 socket.on('get_table_name', function() {
@@ -53,7 +57,7 @@ function Receive(){
 	    var now = new Date();//取得系统时间
 	    var theTimeNow=now.toLocaleString();//获取例“2015-12-25 17:24:28”
 	    //向db插入数据
-	    db.run("INSERT INTO test_table (data,time) VALUES (?,?)",ans,theTimeNow);
+	    //db.run("INSERT INTO test_table (data,time) VALUES (?,?)",ans,theTimeNow);
 
 	    //获取db数据的测试
 	    //db.get("SELECT datetime('now');",function(err,res){
