@@ -7,7 +7,11 @@
 	<br>
 	<p>c=<a id='ans'>???</a></p>
 </div>
-
+<div>
+	<p>Name:<input type="text" id="name" value="username"></p>
+	<p>Pass:<input type="text" id="pass" value="password"></p>
+	<button id="login">LogIn</button>
+</div>
 <div>
 	<h2><a>Table Name</a></h2>
 	
@@ -22,9 +26,17 @@
 
 
 <script src="/socket.io/socket.io.js"></script>
+<script src="/js/sha.js"></script><!-- sha加密模块 -->
 <script type="text/javascript">
-	var socket=io.connect(),//与服务器进行连接
-	//var num=eval(document.getElementById('num').value);
+	var socket=io.connect();//与服务器进行连接
+	
+	login.onclick=function(){
+		var nm=document.getElementById('name').value;
+		var pw=document.getElementById('pass').value;
+		logIn(nm,pw);//一旦确立连接就准备login
+	}
+
+	
 	button=document.getElementById('sendBtn');
 
 	//按下按钮，提交数据
@@ -34,6 +46,7 @@
 		//alert(eval(document.getElementById('num').value));
 		//alert(num);
 		socket.emit('foo',num1,num2);//发送一个名为foo的事件，并且传递变量num
+		
 	}
 	//当后端传来answer事件时，改写网页
 	socket.on('answer',function(answer){
@@ -74,17 +87,17 @@
 		var tempContent = "";
 		for (var i in res) {
 			tempContent += "<p>"+res[i].id+":"+res[i].data+",";
-			//tempContent += res[i].id;
-			//tempContent += ":";
-			//tempContent += res[i].data;
-			//tempContent += ",";
 			tempContent += res[i].time + "</p>";
 	    };	
 	    document.getElementById("db_data").innerHTML=tempContent;
-	})
+	});
 
-
-
+	function logIn (userName,passWord) {
+		var shaObj = new jsSHA("SHA-256", "TEXT");
+		shaObj.update(passWord);//不能用明码来传递pw
+		var hash = shaObj.getHash("HEX");
+		socket.emit('log_in',userName,hash);
+	}
 
 	function addTableName(parent_id,tag,table_name,label,disabled){
 		var para=document.createElement(tag);
