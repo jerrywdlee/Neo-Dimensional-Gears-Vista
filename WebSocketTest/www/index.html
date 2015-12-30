@@ -11,6 +11,7 @@
 	<p>Name:<input type="text" id="name" value="username"></p>
 	<p>Pass:<input type="text" id="pass" value="password"></p>
 	<button id="login">LogIn</button>
+	<button id="logout" disabled="true">LogOut</button>
 </div>
 <div>
 	<h2><a>Table Name</a></h2>
@@ -35,11 +36,39 @@
 		var pw=document.getElementById('pass').value;
 		logIn(nm,pw);//一旦确立连接就准备login
 	}
+	//各种失败时的逻辑
+	socket.on('error_type',function(errorType){
+		switch(errorType){
+			case "no_user" : alert("查无此人"); break;
+			case "pw_wrong" : alert("密码错误"); break;
+			default : alert("未知错误");
+		}
+	});
+
+	//login成功时逻辑
+	socket.on('login_succeed',function(){
+		//alert("login");
+		document.getElementById("login").disabled="true";
+		document.getElementById("logout").disabled="";
+	});
+	//logout方法
+	logout.onclick=function(){
+		socket.close();
+		socket.connect();//先断线然后重连，使login无效化
+	}
+
+
+	//断线时逻辑
+	socket.on('disconnect',function(){
+		//alert("disconnected")//手动重连的断线的时候会闪两次
+		document.getElementById("login").disabled="";
+		document.getElementById("logout").disabled="true";
+	});
+
 
 	
+	//按下按钮，发送勾股
 	button=document.getElementById('sendBtn');
-
-	//按下按钮，提交数据
 	button.onclick=function(){
 		var num1=eval(document.getElementById('num1').value);
 		var num2=eval(document.getElementById('num2').value);

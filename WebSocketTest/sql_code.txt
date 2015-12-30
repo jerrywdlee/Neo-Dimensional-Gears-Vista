@@ -1,0 +1,6 @@
+show variables like '%ssl%'
+CREATE USER 'user1'@'localhost' IDENTIFIED VIA mysql_native_password USING '***';GRANT SELECT, INSERT, UPDATE, DELETE, FILE ON *.* TO 'user1'@'localhost' REQUIRE NONE WITH MAX_QUERIES_PER_HOUR 0 MAX_CONNECTIONS_PER_HOUR 0 MAX_UPDATES_PER_HOUR 0 MAX_USER_CONNECTIONS 0;
+CREATE TABLE `test`.`user_info` ( `id` INT NOT NULL AUTO_INCREMENT , `name` TEXT NOT NULL , `type` TEXT NOT NULL , `time` DATETIME on update CURRENT_TIMESTAMP NOT NULL , PRIMARY KEY (`id`)) ENGINE = InnoDB;
+ALTER TABLE `user_info` ADD `password` TEXT NOT NULL AFTER `name`;
+SELECT * FROM `user_info`
+SELECT * FROM `user_info`

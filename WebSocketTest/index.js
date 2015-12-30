@@ -2,9 +2,21 @@ var fs = require('fs'), //读取RSA加密证书用的文件读取模块
     rsa_options = {
         key: fs.readFileSync('./openssl_keys/server_key.pem'), //SSL密钥路径 
         cert: fs.readFileSync('./openssl_keys/server_crt.pem') //SSL证书路径
-    };
+    },
+    init_users = JSON.parse(fs.readFileSync('./users.json', 'utf8')),
+    login_table_name = init_users.table_name;//读取初始化json的信息
 
-var jsSHA = require("jssha");//sha加密模块
+
+var jsSHA = require("jssha"),//sha加密模块
+    pg = require('pg');//postgres数据库模块
+var connectionString = "postgres://user1:password@localhost:5432/test";
+var client = new pg.Client(connectionString);//登入数据库    
+    client.connect(function(err){
+        if (err) {
+            return console.error('could not connect to postgres', err);
+        };
+        console.log("connect to db")
+    });
 
 var express = require('express'), //引入express模块
     app = express(),
@@ -21,9 +33,6 @@ server.listen(443,function (req, res) { //https的默认端口是443
 
 var userIdType = {};//新建一个储存id与用户权限的哈希表
 
-function getLeg(leg1,leg2){
-	return Math.sqrt(leg1*leg1+leg2*leg2);//用勾股计算弦长
-}
 
 //socket部分
 io.on('connection', function(socket) {
@@ -35,19 +44,44 @@ io.on('connection', function(socket) {
 
     socket.on('log_in',function(userName,hash){
         //服务器端加密用的这个函数只是为了测试
-        var shaObj = new jsSHA("SHA-256", "TEXT");
-        shaObj.update("password");
-        var hash2 = shaObj.getHash("HEX");
-        console.log(userName);
+        //var shaObj = new jsSHA("SHA-256", "TEXT");
+        //shaObj.update("password");
+        //var hash2 = shaObj.getHash("HEX");
+        //console.log(userName);
         //看看是不是能以加密方式保存密码
         //console.log("pw1: "+hash);
         //console.log("pw2: "+hash2);
         //console.log(hash===hash2);
-        //如果不存在该用户，则在哈希表中加入该用户
-        if(!userIdType[id]){
-            userIdType[id]=userName;//日后将此处改为mysql当中的权限
-        }
-        console.log(userIdType);
+
+
+        //login的逻辑
+        var pwInDb = null;        
+        client.query("SELECT password,type FROM "+login_table_name+" WHERE name = $1",[userName],
+        function(err, result){
+            if (err) {
+                return console.error('No such user', err);
+            };
+            try{
+                pwInDb = result.rows[0].password;
+            }catch(e){
+                //console.log(e);
+                return emitError(socket,"no_user");//socket是里面的东西
+            }
+            //console.log(pwInDb===hash&&pwInDb!=null);//防止有人用null来绕开结构
+            //hash="0||true";//注入无法得逞
+            //console.log(pwInDb===hash);
+            //console.log(hash);
+            if (pwInDb===hash&&pwInDb!=null) {
+                //如果不存在该用户，则在哈希表中加入该用户
+                if(!userIdType[id]){
+                    userIdType[id]=result.rows[0].type;//存储在postgres当中的权限
+                }
+                socket.emit('login_succeed');
+            }else{
+                return emitError(socket,"pw_wrong");
+            };           
+            console.log(userIdType);
+        });
     });
 
     //当传来foo事件的时候，计算并输出
@@ -79,8 +113,14 @@ io.on('connection', function(socket) {
     //当数据传来时
     socket.on('db_data',function(res){
         //广播数据
-        socket.broadcast.emit('db_data_receive',res);
+        //socket.broadcast.emit('db_data_receive',res);
         //console.log(res);
+        for (var id_i in userIdType) {
+            if (userIdType[id_i]==="admin") { //只向admin权限的用户广播
+                socket.broadcast.emit('db_data_receive',res);
+            };
+        };
+
     })
 
     //显示断线
@@ -93,3 +133,12 @@ io.on('connection', function(socket) {
     });
 });
 
+
+function getLeg(leg1,leg2){
+    return Math.sqrt(leg1*leg1+leg2*leg2);//用勾股计算弦长
+}
+
+function emitError (socket, errorType) {
+    // 发送错误码
+    socket.emit('error_type',errorType);
+}

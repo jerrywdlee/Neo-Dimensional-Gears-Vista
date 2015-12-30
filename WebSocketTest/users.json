@@ -1,0 +1,8 @@
+{
+	"table_name":"user_info",
+	"users": [
+		{ "name":"admin" , "password":"password" , "type":"admin" }, 
+		{ "name":"common" , "password":"password1" , "type":"user" }, 
+		{ "name":"guest" , "password":"password" , "type":"guest" }
+	]
+}
