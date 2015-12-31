@@ -96,13 +96,19 @@ io.on('connection', function(socket) {
 
     //当传来require_table_name事件时，广播至所有其他客户端
     //io.sockets.emit('foo')则会将自己也包括在广播对象之内
+    //同时，在emit之前加上.to(id)则能向特定对象发送信息(两种写法都可以)
     socket.on('require_table_name',function(){
         socket.broadcast.emit('get_table_name');
     });
     //接收到客户端传来的table名
     socket.on('table_name',function(res){
         //向有效客户端发送收到的东西
-        socket.broadcast.emit('table_name_receive',res);
+        //socket.broadcast.emit('table_name_receive',res);
+        for (var id_i in userIdType) {
+            if (userIdType[id_i]==="admin") { //只向admin权限的用户广播
+                io.sockets.to(id_i).emit('table_name_receive',res);
+            };
+        };
         console.log(res);
     });
 
@@ -117,7 +123,7 @@ io.on('connection', function(socket) {
         //console.log(res);
         for (var id_i in userIdType) {
             if (userIdType[id_i]==="admin") { //只向admin权限的用户广播
-                socket.broadcast.emit('db_data_receive',res);
+                io.sockets.to(id_i).emit('db_data_receive',res);
             };
         };
 
