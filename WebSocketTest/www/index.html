@@ -38,11 +38,17 @@
 	}
 	//各种失败时的逻辑
 	socket.on('error_type',function(errorType){
+		var alertMsg = null;
 		switch(errorType){
-			case "no_user" : alert("查无此人"); break;
-			case "pw_wrong" : alert("密码错误"); break;
-			default : alert("未知错误");
+			case "no_user" : alertMsg="查无此人"; break;
+			case "pw_wrong" : alertMsg="密码错误"; break;
+			case "already_signed" : alertMsg="您已经登录"; break;
+			case "no_permit" : alertMsg="无权限";//同时增加无权限时处理
+							   addTableName("table_name","option","no permission","a","true");
+							   break;
+			default : alertMsg="未知错误";
 		}
+		alert(alertMsg);
 	});
 
 	//login成功时逻辑

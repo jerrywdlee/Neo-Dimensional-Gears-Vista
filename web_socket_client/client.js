@@ -20,7 +20,7 @@ socket.on('disconnect',function() {
 })
 
 //获得所有既存的table名(sqlite_sequence是一个自动生成的table，不要动他)
-socket.on('get_table_name', function() {
+socket.on('get_table_name', function(id) {
 	db.all("SELECT name FROM sqlite_master WHERE type='table' AND name!='sqlite_sequence' order by name;",
 		function(err,res){
 		var sendMsg;
@@ -29,18 +29,18 @@ socket.on('get_table_name', function() {
 		}else{
 			sendMsg = err;
 		}
-		socket.emit('table_name',sendMsg);
+		socket.emit('table_name',sendMsg,id);
 		console.log(sendMsg[0].name+" has been send");
 	});
 });
 
 //获取db数据并发送至服务器端
-socket.on('get_db_data',function(table_name){
+socket.on('get_db_data',function(table_name,id){
 	//console.log("get_db_data")
 	db.all("SELECT * FROM "+table_name+" ;",function(err,res){ //这边会给一个类似JSON的东西
     	if (!err) {
-    		socket.emit('db_data',res);
-    	}else{console.log(err)}
+    		socket.emit('db_data',res,id);
+    	}else{console.log(err,id)}
 	});    
 });
 

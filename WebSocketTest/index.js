@@ -62,7 +62,7 @@ io.on('connection', function(socket) {
                 return console.error('No such user', err);
             };
             try{
-                pwInDb = result.rows[0].password;
+                pwInDb = result.rows[0].password;//预防会取到多个行的情况
             }catch(e){
                 //console.log(e);
                 return emitError(socket,"no_user");//socket是里面的东西
@@ -75,8 +75,10 @@ io.on('connection', function(socket) {
                 //如果不存在该用户，则在哈希表中加入该用户
                 if(!userIdType[id]){
                     userIdType[id]=result.rows[0].type;//存储在postgres当中的权限
+                    socket.emit('login_succeed');
+                }else{
+                    emitError(socket,"already_signed");
                 }
-                socket.emit('login_succeed');
             }else{
                 return emitError(socket,"pw_wrong");
             };           
@@ -98,33 +100,50 @@ io.on('connection', function(socket) {
     //io.sockets.emit('foo')则会将自己也包括在广播对象之内
     //同时，在emit之前加上.to(id)则能向特定对象发送信息(两种写法都可以)
     socket.on('require_table_name',function(){
-        socket.broadcast.emit('get_table_name');
+        console.log(id);
+        if (userIdType[id]==="admin") {
+            socket.broadcast.emit('get_table_name',id);//只有admin有权广播请求,把id作为tag一同广播
+        }else{
+            emitError(socket,"no_permit");//其他用户则报错
+        };
     });
     //接收到客户端传来的table名
-    socket.on('table_name',function(res){
+    socket.on('table_name',function(res,id_tag){
         //向有效客户端发送收到的东西
         //socket.broadcast.emit('table_name_receive',res);
+        /*
         for (var id_i in userIdType) {
             if (userIdType[id_i]==="admin") { //只向admin权限的用户广播
                 io.sockets.to(id_i).emit('table_name_receive',res);
             };
+        };*/
+        if (userIdType[id_tag]==="admin") {
+            io.sockets.to(id_tag).emit('table_name_receive',res);
         };
         console.log(res);
     });
 
     //当请求DB数据时
     socket.on('require_db_data',function(table_name){
-        socket.broadcast.emit('get_db_data',table_name);
+        if (userIdType[id]==="admin") {
+            socket.broadcast.emit('get_db_data',table_name,id);//只有admin有权广播请求,把id作为tag一同广播
+        }else{
+            emitError(socket,"no_permit");//其他用户则报错
+        };
+        
     });
     //当数据传来时
-    socket.on('db_data',function(res){
+    socket.on('db_data',function(res,id_tag){
         //广播数据
         //socket.broadcast.emit('db_data_receive',res);
         //console.log(res);
-        for (var id_i in userIdType) {
+        /*for (var id_i in userIdType) {
             if (userIdType[id_i]==="admin") { //只向admin权限的用户广播
                 io.sockets.to(id_i).emit('db_data_receive',res);
             };
+        };*/
+        if (userIdType[id_tag]==="admin") { //只向admin权限的用户广播
+            io.sockets.to(id_tag).emit('db_data_receive',res);
         };
 
     })
