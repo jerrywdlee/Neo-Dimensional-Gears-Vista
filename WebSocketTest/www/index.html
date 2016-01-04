@@ -67,6 +67,7 @@
 	//断线时逻辑
 	socket.on('disconnect',function(){
 		//alert("disconnected")//手动重连的断线的时候会闪两次
+		//重置login/logout按钮
 		document.getElementById("login").disabled="";
 		document.getElementById("logout").disabled="true";
 	});
