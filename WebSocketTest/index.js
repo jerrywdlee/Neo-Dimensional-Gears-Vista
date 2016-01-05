@@ -41,8 +41,9 @@ io.on('connection', function(socket) {
     //var ip = address.address||socket.handshake.headers['x-forwarded-for'];//利用X-Forwarded-For取得真实ip(不好用)
     //console.log('Connected to '+address);//在控制台显示连接上的客户端ip
     var clientIp = socket.request.connection;//1.0.4的用法
-    var ip = clientIp.remoteAddress, port = clientIp.remotePort;
-    console.log('Connected to '+ip+':'+port);//在控制台显示连接上的客户端ip,"::ffff:192.168.11.14"
+    var ip = clientIp.remoteAddress, port = clientIp.remotePort;//这里的ip是v4和v6的混合,"::ffff:192.168.11.14"
+    var ip_v4 = ip.split(":");
+    console.log('Connected to '+ip_v4[ip_v4.length-1]+':'+port);//在控制台显示连接上的客户端ipv4
     
     var id = socket.id;
     //console.log("id = "+socket.id);//显示连上的用户的id
