@@ -37,8 +37,13 @@ var userIdType = {};//新建一个储存id与用户权限的哈希表
 //socket部分
 io.on('connection', function(socket) {
     //接收并处理客户端发送的foo事件
-    var ip = socket.handshake.address; //获取客户端IP地址
-    console.log('Connected to '+ip);//在控制台显示连接上的客户端ip
+    //var address = socket.handshake.address.address; //获取客户端IP地址,含有port信息,0.9.x的用法
+    //var ip = address.address||socket.handshake.headers['x-forwarded-for'];//利用X-Forwarded-For取得真实ip(不好用)
+    //console.log('Connected to '+address);//在控制台显示连接上的客户端ip
+    var clientIp = socket.request.connection;//1.0.4的用法
+    var ip = clientIp.remoteAddress, port = clientIp.remotePort;
+    console.log('Connected to '+ip+':'+port);//在控制台显示连接上的客户端ip,"::ffff:192.168.11.14"
+    
     var id = socket.id;
     //console.log("id = "+socket.id);//显示连上的用户的id
 

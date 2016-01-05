@@ -1,6 +1,11 @@
 <title>Pythagorean theorem</title>
 <h1>Pythagorean theorem</h1>
 <div>
+	<p>Local IP :<a id="local_ip"></a></p>
+	<p>Global IP:<a id="global_ip"></a></p>
+	<button id="get_ip">Get IP Remote</button>
+</div>
+<div>
 	<p>a=<input type="number" id="num1" value='3'></p>
 	<p>b=<input type="number" id="num2" value='4'></p>
 	<button id='sendBtn'>Send</button>
@@ -28,6 +33,8 @@
 
 <script src="/socket.io/socket.io.js"></script>
 <script src="/js/sha.js"></script><!-- sha加密模块 -->
+<script src="/js/getIPs.js"></script><!-- IP获取模块(本地,只针对chrome和火狐) -->
+
 <script type="text/javascript">
 	var socket=io.connect();//与服务器进行连接
 	
@@ -160,5 +167,14 @@
 		};
 	}
 
+	function getIP(json){
+		get_ip.onclick=function(){
+			alert(json.ip);
+		}	
+	}
+
 </script>
+
+<script src="https://api.ipify.org?format=jsonp&callback=getIP"></script>
+<!-- IP获取模块(其他用法详见：https://www.ipify.org/) 必须写在函数原型之后-->
 <br/>
