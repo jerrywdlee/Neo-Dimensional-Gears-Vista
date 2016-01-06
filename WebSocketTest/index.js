@@ -155,6 +155,11 @@ io.on('connection', function(socket) {
 
     })
 
+    //显示延迟
+    socket.on('ping',function(){
+        socket.emit('pong');
+    })
+
     //显示断线
     socket.on('disconnect',function() {    	
     	console.log('User id='+id+' disconnected');

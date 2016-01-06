@@ -3,6 +3,7 @@
 <div>
 	<p>Local IP :<a id="local_ip"></a></p>
 	<p>Global IP:<a id="global_ip"></a></p>
+	<p>Delay :<a id="delay"></a></p>
 	<button id="get_ip">Get IP Remote</button>
 </div>
 <div>
@@ -77,6 +78,7 @@
 		//重置login/logout按钮
 		document.getElementById("login").disabled="";
 		document.getElementById("logout").disabled="true";
+		document.getElementById("delay").innerHTML="Disconnected";
 	});
 
 
@@ -166,12 +168,36 @@
 			}	
 		};
 	}
-
+	//连接IP获取模块用的
 	function getIP(json){
 		get_ip.onclick=function(){
 			alert(json.ip);
 		}	
 	}
+
+	//测试网络延迟的函数群
+	socket.emit('ping');
+	startTime= Date.now();//第一次ping
+	var if_pinged = true;//检查是否完成一个ping-pong循环
+	
+	//这个函数是延时并循环执行
+	setInterval(function(){
+		startTime= Date.now();
+		if (!if_pinged) {
+			socket.emit('ping');
+		}else{
+			document.getElementById("delay").innerHTML="Very High";
+			socket.emit('ping');
+		}
+	},5000);
+	socket.on('pong',function() {
+		var endTime = Date.now();
+		var latency = endTime-startTime;
+		document.getElementById("delay").innerHTML=latency;
+		if_pinged=false;//完成了一个循环
+	});
+
+	 
 
 </script>
 
