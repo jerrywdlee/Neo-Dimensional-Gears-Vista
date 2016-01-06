@@ -55,7 +55,12 @@ function Receive(){
 	socket.on('answer', function (ans) {  
 	    console.log('I received '+ans);
 	    var now = new Date();//取得系统时间
-	    var theTimeNow=now.toLocaleString();//获取例“2015-12-25 17:24:28”
+	    //var theTimeNow=now.toLocaleString();//获取例“2015-12-25 17:24:28”,SQlite只认这个
+	    //var theTimeNow=now.toUTCString();//Wed, 06 Jan 2016 03:13:04 GMT
+	    //var theTimeNow=now;//Wed Jan 06 2016 12:22:04 GMT+0900 (东京标准时间)
+	    var timeNowISO = now.toISOString();//2016-01-06T04:38:02.561Z
+	    var theTimeNow=timeNowISO.split('T')[0]+" "+timeNowISO.split('T')[1].split('Z')[0];
+	    console.log("time: "+theTimeNow);//2016-01-06 04:41:13.636
 	    //向db插入数据
 	    //db.run("INSERT INTO test_table (data,time) VALUES (?,?)",ans,theTimeNow);
 

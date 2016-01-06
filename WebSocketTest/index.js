@@ -61,7 +61,8 @@ io.on('connection', function(socket) {
 
 
         //login的逻辑
-        var pwInDb = null;        
+        var pwInDb = null;
+        //$1de写法能防止SQL注入        
         client.query("SELECT password,type FROM "+login_table_name+" WHERE name = $1",[userName],
         function(err, result){
             if (err) {
