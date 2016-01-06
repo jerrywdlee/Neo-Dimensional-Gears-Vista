@@ -39,10 +39,19 @@
 <script type="text/javascript">
 	var socket=io.connect();//与服务器进行连接
 	
+	var global_ip;
+	//连接IP获取模块用的
+	function getIP(json){
+		global_ip=json.ip;
+		get_ip.onclick=function(){
+			alert(json.ip);
+		}	
+	}
 	login.onclick=function(){
 		var nm=document.getElementById('name').value;
 		var pw=document.getElementById('pass').value;
-		logIn(nm,pw);//一旦确立连接就准备login
+		//alert(global_ip);
+		logIn(nm,pw,global_ip);//一旦确立连接就准备login
 	}
 	//各种失败时的逻辑
 	socket.on('error_type',function(errorType){
@@ -137,11 +146,11 @@
 	    document.getElementById("db_data").innerHTML=tempContent;
 	});
 
-	function logIn (userName,passWord) {
+	function logIn (userName,passWord,ip) {
 		var shaObj = new jsSHA("SHA-256", "TEXT");
 		shaObj.update(passWord);//不能用明码来传递pw
 		var hash = shaObj.getHash("HEX");
-		socket.emit('log_in',userName,hash);
+		socket.emit('log_in',userName,hash,ip);
 	}
 
 	function addTableName(parent_id,tag,table_name,label,disabled){
@@ -168,12 +177,7 @@
 			}	
 		};
 	}
-	//连接IP获取模块用的
-	function getIP(json){
-		get_ip.onclick=function(){
-			alert(json.ip);
-		}	
-	}
+	
 
 	//测试网络延迟的函数群
 	socket.emit('ping');

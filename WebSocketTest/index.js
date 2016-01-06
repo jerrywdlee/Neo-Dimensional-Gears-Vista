@@ -44,11 +44,29 @@ io.on('connection', function(socket) {
     var ip = clientIp.remoteAddress, port = clientIp.remotePort;//这里的ip是v4和v6的混合,"::ffff:192.168.11.14"
     var ip_v4 = ip.split(":");
     console.log('Connected to '+ip_v4[ip_v4.length-1]+':'+port);//在控制台显示连接上的客户端ipv4
+
+    /*var global_ip = "";
+    socket.on('global_ip',function(get_global_ip){
+        global_ip = get_global_ip;
+    });*/
     
     var id = socket.id;
     //console.log("id = "+socket.id);//显示连上的用户的id
 
-    socket.on('log_in',function(userName,hash){
+    //连接上的同时新增一个角色
+    if(!userIdType[id]){
+        userIdType[id]={};
+        userIdType[id].local_ip=ip_v4[ip_v4.length-1];
+        //userIdType[id].global_ip=global_ip;
+        /*
+        userIdType[id].login_name="";
+        userIdType[id].company="";
+        userIdType[id].authority="";*/
+    }
+
+
+
+    socket.on('log_in',function(userName,hash,ip){
         //服务器端加密用的这个函数只是为了测试
         //var shaObj = new jsSHA("SHA-256", "TEXT");
         //shaObj.update("password");
@@ -58,11 +76,14 @@ io.on('connection', function(socket) {
         //console.log("pw1: "+hash);
         //console.log("pw2: "+hash2);
         //console.log(hash===hash2);
-
+        console.log(userName+ ip);
+        //记录login的名字和global IP
+        userIdType[id].login_name=userName;
+        userIdType[id].global_ip=ip;
 
         //login的逻辑
         var pwInDb = null;
-        //$1de写法能防止SQL注入        
+        //$1 这种写法能防止SQL注入        
         client.query("SELECT password,type FROM "+login_table_name+" WHERE name = $1",[userName],
         function(err, result){
             if (err) {
@@ -80,16 +101,16 @@ io.on('connection', function(socket) {
             //console.log(hash);
             if (pwInDb===hash&&pwInDb!=null) {
                 //如果不存在该用户，则在哈希表中加入该用户
-                if(!userIdType[id]){
-                    userIdType[id]=result.rows[0].type;//存储在postgres当中的权限
+                if(userIdType[id]){
+                    userIdType[id].authority=result.rows[0].type;//存储在postgres当中的权限
                     socket.emit('login_succeed');
                 }else{
-                    emitError(socket,"already_signed");
+                    emitError(socket,"unknow");
                 }
             }else{
                 return emitError(socket,"pw_wrong");
             };           
-            console.log(userIdType);
+            console.log(userIdType);//最终这里将向一个表单记录login的时间,ip和用户名
         });
     });
 
@@ -108,7 +129,7 @@ io.on('connection', function(socket) {
     //同时，在emit之前加上.to(id)则能向特定对象发送信息(两种写法都可以)
     socket.on('require_table_name',function(){
         console.log(id);
-        if (userIdType[id]==="admin") {
+        if (userIdType[id].authority==="admin") {
             socket.broadcast.emit('get_table_name',id);//只有admin有权广播请求,把id作为tag一同广播
         }else{
             emitError(socket,"no_permit");//其他用户则报错
@@ -124,7 +145,7 @@ io.on('connection', function(socket) {
                 io.sockets.to(id_i).emit('table_name_receive',res);
             };
         };*/
-        if (userIdType[id_tag]==="admin") {
+        if (userIdType[id_tag].authority==="admin") {
             io.sockets.to(id_tag).emit('table_name_receive',res);
         };
         console.log(res);
@@ -132,7 +153,7 @@ io.on('connection', function(socket) {
 
     //当请求DB数据时
     socket.on('require_db_data',function(table_name){
-        if (userIdType[id]==="admin") {
+        if (userIdType[id].authority==="admin") {
             socket.broadcast.emit('get_db_data',table_name,id);//只有admin有权广播请求,把id作为tag一同广播
         }else{
             emitError(socket,"no_permit");//其他用户则报错
@@ -149,7 +170,7 @@ io.on('connection', function(socket) {
                 io.sockets.to(id_i).emit('db_data_receive',res);
             };
         };*/
-        if (userIdType[id_tag]==="admin") { //只向admin权限的用户广播
+        if (userIdType[id_tag].authority==="admin") { //只向admin权限的用户广播
             io.sockets.to(id_tag).emit('db_data_receive',res);
         };
 
