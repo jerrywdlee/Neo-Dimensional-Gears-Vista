@@ -60,7 +60,9 @@ function Receive(){
 	    //var theTimeNow=now;//Wed Jan 06 2016 12:22:04 GMT+0900 (东京标准时间)
 	    var timeNowISO = now.toISOString();//2016-01-06T04:38:02.561Z
 	    var theTimeNow=timeNowISO.split('T')[0]+" "+timeNowISO.split('T')[1].split('Z')[0];
-	    console.log("time: "+theTimeNow);//2016-01-06 04:41:13.636
+	    console.log("time: "+theTimeNow);//2016-01-06 04:41:13.636 
+	    //使用的时候将该数据和时区(例:GMT+0800)联合使用
+	    //var date = new Date("2015-12-28 18:37:34 GMT+0800");
 	    //向db插入数据
 	    //db.run("INSERT INTO test_table (data,time) VALUES (?,?)",ans,theTimeNow);
 
