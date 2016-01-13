@@ -58,6 +58,7 @@ io.on('connection', function(socket) {
     if(!userIdType[id]){
         userIdType[id]={};
         userIdType[id].local_ip=ip_v4[ip_v4.length-1];
+        userIdType[id].network_delay="";
         //userIdType[id].global_ip=global_ip;
         /*
         userIdType[id].login_name="";
@@ -197,24 +198,42 @@ io.on('connection', function(socket) {
     })*/
 
     //测试网络延迟的函数群
-    socket.emit('ping',Date.now());
-    //startTime= Date.now();//第一次ping
+    var startTime= Date.now();//第一次ping
+    socket.emit('ping',startTime);
     var if_pinged = true;//检查是否完成一个ping-pong循环  
     setInterval(function(){
-        var startTime= Date.now();
-        socket.emit('ping',startTime);
+        startTime= Date.now();
+        socket.broadcast.emit('ping',startTime,id);
         if (if_pinged) {
-            userIdType[id].network_delay=null}
-            socket.emit('ping',startTime);
+            if (userIdType[id]) {
+                userIdType[id].network_delay=""
+            };
+        }
+            //socket.emit('ping',startTime);
     },5000);
+    socket.on('pong_client',function(startTime){
+        var endTime = Date.now();
+        if (startTime) { //sometime it will be undefined
+            var latency = endTime-startTime;
+            console.log(id+ " delay:"+latency);
+            userIdType[id].network_delay=latency;
+            //console.log(userIdType)
+            if_pinged=false;
+            socket.emit('delay',latency);
+        };
+    })
+
+
     socket.on('pong',function(startTime) {
+        /*
+        console.log("ponged");
         var endTime = Date.now();
         var latency = endTime-startTime;
         console.log(id+ " delay:"+latency)
         socket.emit('delay',latency);
         userIdType[id].network_delay=latency;
-        //console.log(userIdType)
-        if_pinged=false;//完成了一个循环
+        console.log(userIdType)
+        if_pinged=false;//完成了一个循环*/
     });
 
     //显示断线

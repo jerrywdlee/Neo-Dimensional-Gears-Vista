@@ -207,7 +207,8 @@
 	*/
 	socket.on('ping',function(startTime){
         //var timeServer = Date.now();
-        socket.emit('pong',startTime);
+        //socket.emit('pong',startTime);//broken
+        socket.emit('pong_client',startTime);
     })
     socket.on('delay',function(latency){
     	document.getElementById("delay").innerHTML=latency;
