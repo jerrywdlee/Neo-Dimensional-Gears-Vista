@@ -7,16 +7,17 @@ var fs = require('fs'), //读取RSA加密证书用的文件读取模块
     login_table_name = init_users.table_name;//读取初始化json的信息
 
 
-var jsSHA = require("jssha"),//sha加密模块
-    pg = require('pg');//postgres数据库模块
+var jsSHA = require("jssha");//sha加密模块
+//var pg = require('pg');//postgres数据库模块
 var connectionString = "postgres://user1:password@localhost:5432/test";
+/*
 var client = new pg.Client(connectionString);//登入数据库    
     client.connect(function(err){
         if (err) {
             return console.error('could not connect to postgres', err);
         };
         console.log("connect to db")
-    });
+    });*/
 
 var express = require('express'), //引入express模块
     app = express(),
@@ -65,7 +66,7 @@ io.on('connection', function(socket) {
     }
 
 
-
+    /*
     socket.on('log_in',function(userName,hash,ip){
         //服务器端加密用的这个函数只是为了测试
         //var shaObj = new jsSHA("SHA-256", "TEXT");
@@ -112,7 +113,7 @@ io.on('connection', function(socket) {
             };           
             console.log(userIdType);//最终这里将向一个表单记录login的时间,ip和用户名
         });
-    });
+    });*/
 
     //当传来foo事件的时候，计算并输出
     socket.on('foo', function(data1,data2) {
