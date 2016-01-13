@@ -178,7 +178,7 @@
 		};
 	}
 	
-
+	/*
 	//测试网络延迟的函数群
 	socket.emit('ping');
 	startTime= Date.now();//第一次ping
@@ -188,20 +188,30 @@
 	setInterval(function(){
 		startTime= Date.now();
 		if (!if_pinged) {
-			socket.emit('ping');
+			socket.emit('ping',startTime);
 		}else{
 			document.getElementById("delay").innerHTML="Very High";
 			socket.emit('ping');
 		}
 	},5000);
-	socket.on('pong',function() {
+	socket.on('pong',function(delay) {
 		var endTime = Date.now();
-		var latency = endTime-startTime;
+		//var latency = endTime-startTime;
+		//var to_server = timeServer-time_ui;
+		//var from_server = endTime- timeServer;
+		//alert("复路:"+from_server+"往路:"+to_server )
+		//document.getElementById("delay").innerHTML=latency;
 		document.getElementById("delay").innerHTML=latency;
 		if_pinged=false;//完成了一个循环
 	});
-
-	 
+	*/
+	socket.on('ping',function(startTime){
+        //var timeServer = Date.now();
+        socket.emit('pong',startTime);
+    })
+    socket.on('delay',function(latency){
+    	document.getElementById("delay").innerHTML=latency;
+    })
 
 </script>
 

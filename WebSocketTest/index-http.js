@@ -190,9 +190,32 @@ io.on('connection', function(socket) {
 
     /*****  ****/
     //显示延迟
-    socket.on('ping',function(){
-        socket.emit('pong');
-    })
+    /*
+    socket.on('ping',function(time_ui){
+        var timeServer = Date.now();
+        socket.emit('pong',timeServer,time_ui);
+    })*/
+
+    //测试网络延迟的函数群
+    socket.emit('ping',Date.now());
+    //startTime= Date.now();//第一次ping
+    var if_pinged = true;//检查是否完成一个ping-pong循环  
+    setInterval(function(){
+        var startTime= Date.now();
+        socket.emit('ping',startTime);
+        if (if_pinged) {
+            userIdType[id].network_delay=null}
+            socket.emit('ping',startTime);
+    },5000);
+    socket.on('pong',function(startTime) {
+        var endTime = Date.now();
+        var latency = endTime-startTime;
+        console.log(id+ " delay:"+latency)
+        socket.emit('delay',latency);
+        userIdType[id].network_delay=latency;
+        //console.log(userIdType)
+        if_pinged=false;//完成了一个循环
+    });
 
     //显示断线
     socket.on('disconnect',function() {    	
