@@ -43,8 +43,13 @@ io.on('connection', function(socket) {
     //console.log('Connected to '+address);//在控制台显示连接上的客户端ip
     var clientIp = socket.request.connection;//1.0.4的用法
     var ip = clientIp.remoteAddress, port = clientIp.remotePort;//这里的ip是v4和v6的混合,"::ffff:192.168.11.14"
-    var ip_v4 = ip.split(":");
-    console.log('Connected to '+ip_v4[ip_v4.length-1]+':'+port);//在控制台显示连接上的客户端ipv4
+    if (ip.indexOf(":")!=-1) {
+        var ip_v4 = ip.split(":")[ip.split(":").length-1]+':'+port;
+    }else{
+        var ip_v4 = ip+':'+port
+    }
+    //var ip_v4 = ip.split(":");
+    console.log('Connected to '+ip_v4);//在控制台显示连接上的客户端ipv4
 
     /*var global_ip = "";
     socket.on('global_ip',function(get_global_ip){
@@ -57,7 +62,7 @@ io.on('connection', function(socket) {
     //连接上的同时新增一个角色
     if(!userIdType[id]){
         userIdType[id]={};
-        userIdType[id].local_ip=ip_v4[ip_v4.length-1];
+        userIdType[id].local_ip=ip_v4;
         userIdType[id].network_delay="";
         //userIdType[id].global_ip=global_ip;
         /*
@@ -182,12 +187,12 @@ io.on('connection', function(socket) {
         console.log(instr_list)
     })
 
-    socket.emit('local_admin_page');
+    //socket.emit('local_admin_page');
 
-    socket.on('local_admin_page',function(data) {
+    //socket.on('local_admin_page',function(data) {
         //it will return buffer
-        console.log(data.toString());
-    })
+        //console.log(data.toString());
+    //})
 
     /*****  ****/
     //显示延迟
@@ -199,31 +204,33 @@ io.on('connection', function(socket) {
 
     //测试网络延迟的函数群
     var startTime= Date.now();//第一次ping
-    socket.emit('ping',startTime);
+    socket.emit('ping');
     var if_pinged = true;//检查是否完成一个ping-pong循环  
     setInterval(function(){
         startTime= Date.now();
-        socket.broadcast.emit('ping',startTime,id);
-        if (if_pinged) {
-            if (userIdType[id]) {
-                userIdType[id].network_delay=""
-            };
+        console.log(startTime);
+        socket.emit('ping');
+        if_pinged=true;
+        if (if_pinged&&userIdType[id]) {
+                userIdType[id].network_delay="";
         }
-            //socket.emit('ping',startTime);
-    },5000);
-    socket.on('pong_client',function(startTime){
-        var endTime = Date.now();
-        if (startTime) { //sometime it will be undefined
+    },8000);
+    socket.on('pong_client',function(){
+        console.log("ponged")
+        if (if_pinged==true) {
+            var endTime = Date.now();
             var latency = endTime-startTime;
-            console.log(id+ " delay:"+latency);
+            console.log("id:"+id+ " delay:"+latency);
             userIdType[id].network_delay=latency;
-            //console.log(userIdType)
-            if_pinged=false;
             socket.emit('delay',latency);
         };
+        if_pinged=false;
     })
-
-
+    /*
+    socket.on('test',function() {
+        console.log("aaa");
+    })*/
+    /*
     socket.on('pong',function(startTime) {
         /*
         console.log("ponged");
@@ -233,8 +240,8 @@ io.on('connection', function(socket) {
         socket.emit('delay',latency);
         userIdType[id].network_delay=latency;
         console.log(userIdType)
-        if_pinged=false;//完成了一个循环*/
-    });
+        if_pinged=false;//完成了一个循环
+    });*/
 
     //显示断线
     socket.on('disconnect',function() {    	
