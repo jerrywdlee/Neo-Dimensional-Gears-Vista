@@ -208,12 +208,12 @@ io.on('connection', function(socket) {
     var if_pinged = true;//检查是否完成一个ping-pong循环  
     setInterval(function(){
         startTime= Date.now();
-        console.log(startTime);
-        socket.emit('ping');
-        if_pinged=true;
+        //console.log(startTime);
+        socket.emit('ping',"aaaaaaa");
         if (if_pinged&&userIdType[id]) {
                 userIdType[id].network_delay="";
         }
+        if_pinged=true;
     },8000);
     socket.on('pong_client',function(){
         console.log("ponged")
