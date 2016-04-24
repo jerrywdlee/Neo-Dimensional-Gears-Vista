@@ -230,6 +230,22 @@ io.on('connection', function(socket) {
     socket.on('push_raw_data',function (data) {
       console.log(data.toString());
     })
+    socket.emit('unpushed_num');
+    socket.on('sum_unpushed',function (num) {
+      console.log('Total '+num+' Records Unpushed');
+    })
+    socket.emit('force_push',5);
+    socket.on('return_force_push',function (data) {
+      console.log(JSON.parse(data));
+      var num = JSON.parse(data).length
+      console.log(num +" Records uploaded");
+      socket.emit('unpushed_num');
+    })
+    socket.emit('reg');
+    console.log("reg");
+    socket.on('reg_log',function (res) {
+      console.log(res)
+    })
     /*
     socket.on('test',function() {
         console.log("aaa");
