@@ -1,6 +1,6 @@
 var fs = require('fs'), //读取RSA加密证书用的文件读取模块
     rsa_options = {
-        key: fs.readFileSync('./openssl_keys/server_key.pem'), //SSL密钥路径 
+        key: fs.readFileSync('./openssl_keys/server_key.pem'), //SSL密钥路径
         cert: fs.readFileSync('./openssl_keys/server_crt.pem') //SSL证书路径
     },
     init_users = JSON.parse(fs.readFileSync('./users.json', 'utf8')),
@@ -11,7 +11,7 @@ var jsSHA = require("jssha");//sha加密模块
 //var pg = require('pg');//postgres数据库模块
 var connectionString = "postgres://user1:password@localhost:5432/test";
 /*
-var client = new pg.Client(connectionString);//登入数据库    
+var client = new pg.Client(connectionString);//登入数据库
     client.connect(function(err){
         if (err) {
             return console.error('could not connect to postgres', err);
@@ -55,7 +55,7 @@ io.on('connection', function(socket) {
     socket.on('global_ip',function(get_global_ip){
         global_ip = get_global_ip;
     });*/
-    
+
     var id = socket.id;
     //console.log("id = "+socket.id);//显示连上的用户的id
 
@@ -90,7 +90,7 @@ io.on('connection', function(socket) {
 
         //login的逻辑
         var pwInDb = null;
-        //$1 这种写法能防止SQL注入        
+        //$1 这种写法能防止SQL注入
         client.query("SELECT password,type FROM "+login_table_name+" WHERE name = $1",[userName],
         function(err, result){
             if (err) {
@@ -116,7 +116,7 @@ io.on('connection', function(socket) {
                 }
             }else{
                 return emitError(socket,"pw_wrong");
-            };           
+            };
             console.log(userIdType);//最终这里将向一个表单记录login的时间,ip和用户名
         });
     });*/
@@ -165,7 +165,7 @@ io.on('connection', function(socket) {
         }else{
             emitError(socket,"no_permit");//其他用户则报错
         };
-        
+
     });
     //当数据传来时
     socket.on('db_data',function(res,id_tag){
@@ -205,18 +205,19 @@ io.on('connection', function(socket) {
     //测试网络延迟的函数群
     var startTime= Date.now();//第一次ping
     socket.emit('ping');
-    var if_pinged = true;//检查是否完成一个ping-pong循环  
+    var if_pinged = true;//检查是否完成一个ping-pong循环
     setInterval(function(){
         startTime= Date.now();
         //console.log(startTime);
-        socket.emit('ping',"aaaaaaa");
+        socket.emit('ping',startTime);
         if (if_pinged&&userIdType[id]) {
                 userIdType[id].network_delay="";
         }
         if_pinged=true;
     },8000);
-    socket.on('pong_client',function(){
-        console.log("ponged")
+    socket.on('pong_client',function(data){
+        console.log("ponged"+data)
+        console.log(Date.now()-data);
         if (if_pinged==true) {
             var endTime = Date.now();
             var latency = endTime-startTime;
@@ -225,6 +226,9 @@ io.on('connection', function(socket) {
             socket.emit('delay',latency);
         };
         if_pinged=false;
+    })
+    socket.on('push_raw_data',function (data) {
+      console.log(data.toString());
     })
     /*
     socket.on('test',function() {
@@ -244,7 +248,7 @@ io.on('connection', function(socket) {
     });*/
 
     //显示断线
-    socket.on('disconnect',function() {    	
+    socket.on('disconnect',function() {
     	console.log('User id='+id+' disconnected');
         if(userIdType[id]){
             delete userIdType[id];//退出时删除该用户
