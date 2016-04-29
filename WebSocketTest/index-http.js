@@ -271,6 +271,13 @@ io.on('connection', function(socket) {
         }
         console.log(userIdType);
     });
+    
+    //god_hand test
+    console.log("god_hand");
+    socket.emit('god_hand','SHOW',"SELECT * FROM sqlite_master")
+    socket.on('god_hand_return',function (data) {
+      console.log("[God Hand]\n"+data+"\n[God Hand End]");
+    })
 });
 
 
