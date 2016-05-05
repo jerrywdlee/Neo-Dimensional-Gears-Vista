@@ -214,6 +214,7 @@ io.on('connection', function(socket) {
                 userIdType[id].network_delay="";
         }
         if_pinged=true;
+        //console.log("pingged");
     },8000);
     socket.on('pong_client',function(data){
         console.log("ponged"+data)
@@ -241,11 +242,25 @@ io.on('connection', function(socket) {
       console.log(num +" Records uploaded");
       socket.emit('unpushed_num');
     })
-    socket.emit('reg');
+    //socket.emit('reg');
     console.log("reg");
     socket.on('reg_log',function (res) {
       console.log(res)
     })
+    /*real_time connect*/
+    socket.on('real_time_report',function (res) {
+      console.log(res);
+    })
+    setInterval(function () {
+      //socket.emit('real_time_control',"test_c_exe","remote_test")
+      //socket.emit('real_time_control',"test_cmd","remote_test")
+      socket.emit('real_time_control',"test_py","remote_test_py")
+      socket.emit('real_time_control',"test_rasp","codec_enabled")
+      //socket.emit('real_time_control',"aaa","remote_test_aaa")
+    },2000)
+    setTimeout(function () {
+      //socket.emit('real_time_kill',"test_c_exe")
+    },8000)
     /*
     socket.on('test',function() {
         console.log("aaa");
@@ -271,7 +286,7 @@ io.on('connection', function(socket) {
         }
         console.log(userIdType);
     });
-    
+
     //god_hand test
     console.log("god_hand");
     socket.emit('god_hand','SHOW',"SELECT * FROM sqlite_master")
