@@ -230,6 +230,10 @@ io.on('connection', function(socket) {
     })
     socket.on('push_raw_data',function (data) {
       console.log(data.toString());
+      console.log("AAAAAAAAAAAAAAAA");
+      console.log(data[0].instr_name)
+      console.log(data[0].raw_data);
+      console.log("AAAAAAAAAAAAAAAA")
     })
     socket.emit('unpushed_num');
     socket.on('sum_unpushed',function (num) {
@@ -237,8 +241,10 @@ io.on('connection', function(socket) {
     })
     socket.emit('force_push',5);
     socket.on('return_force_push',function (data) {
-      console.log(JSON.parse(data));
-      var num = JSON.parse(data).length
+      //console.log(JSON.parse(data));
+      console.log(data);
+      //var num = JSON.parse(data).length
+      var num = data.length
       console.log(num +" Records uploaded");
       socket.emit('unpushed_num');
     })
@@ -255,12 +261,18 @@ io.on('connection', function(socket) {
       //socket.emit('real_time_control',"test_c_exe","remote_test")
       //socket.emit('real_time_control',"test_cmd","remote_test")
       socket.emit('real_time_control',"test_py","remote_test_py")
-      socket.emit('real_time_control',"test_rasp","codec_enabled")
+      //socket.emit('real_time_control',"test_rasp","codec_enabled")
+      socket.emit('real_time_control',"test_rb","hello rb")
       //socket.emit('real_time_control',"aaa","remote_test_aaa")
     },2000)
     setTimeout(function () {
       //socket.emit('real_time_kill',"test_c_exe")
     },8000)
+    socket.on('push_triggered_data',function (res) {
+      console.log("\nALERT  trigger  ALERT");
+      console.log(res);
+      console.log("\n");
+    })
     /*
     socket.on('test',function() {
         console.log("aaa");
