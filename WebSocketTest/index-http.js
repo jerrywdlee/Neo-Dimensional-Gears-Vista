@@ -253,6 +253,16 @@ io.on('connection', function(socket) {
     socket.on('reg_log',function (res) {
       console.log(res)
     })
+
+    setTimeout(function () {
+      socket.emit('get_dev_conf')
+    },3000)
+    socket.on('dev_conf',function (conf) {
+      console.log(conf);
+      conf.auto_del_num = 1234;
+      socket.emit('set_dev_conf',conf);
+    })
+
     /*real_time connect*/
     socket.on('real_time_report',function (res) {
       console.log(res);
